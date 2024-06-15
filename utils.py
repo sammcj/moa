@@ -6,7 +6,18 @@ import openai
 import copy
 
 from loguru import logger
+from dotenv import load_dotenv
 
+load_dotenv()
+
+API_KEY = os.getenv("API_KEY")
+API_BASE = os.getenv("API_BASE")
+
+API_KEY_2 = os.getenv("API_KEY_2")
+API_BASE_2 = os.getenv("API_BASE_2")
+
+MAX_TOKENS = os.getenv("MAX_TOKENS")
+TEMPERATURE = os.getenv("TEMPERATURE")
 
 DEBUG = int(os.environ.get("DEBUG", "0"))
 
@@ -14,10 +25,14 @@ DEBUG = int(os.environ.get("DEBUG", "0"))
 def generate_together(
     model,
     messages,
-    max_tokens=2048,
-    temperature=0.7,
+    max_tokens=MAX_TOKENS,
+    temperature=TEMPERATURE,
     streaming=False,
 ):
+
+    logger.info(
+        f"Input data: model={model}, messages={messages}, max_tokens={max_tokens}, temperature={temperature}"
+    )
 
     output = None
 
@@ -25,12 +40,9 @@ def generate_together(
 
         try:
 
-            endpoint = "https://api.together.xyz/v1/chat/completions"
+            endpoint = f"{API_BASE}/chat/completions"
 
-            if DEBUG:
-                logger.debug(
-                    f"Sending messages ({len(messages)}) (last message: `{messages[-1]['content'][:20]}...`) to `{model}`."
-                )
+            logger.info(f"Sending request to {endpoint}")
 
             res = requests.post(
                 endpoint,
@@ -41,9 +53,12 @@ def generate_together(
                     "messages": messages,
                 },
                 headers={
-                    "Authorization": f"Bearer {os.environ.get('TOGETHER_API_KEY')}",
+                    "Authorization": f"Bearer {API_KEY}",
                 },
             )
+
+            logger.info(f"Response: {res.json()}")
+
             if "error" in res.json():
                 logger.error(res.json())
                 if res.json()["error"]["type"] == "invalid_request_error":
@@ -56,9 +71,6 @@ def generate_together(
 
         except Exception as e:
             logger.error(e)
-            if DEBUG:
-                logger.debug(f"Msgs: `{messages}`")
-
             logger.info(f"Retry in {sleep_time}s..")
             time.sleep(sleep_time)
 
@@ -68,8 +80,7 @@ def generate_together(
 
     output = output.strip()
 
-    if DEBUG:
-        logger.debug(f"Output: `{output[:20]}...`.")
+    logger.info(f"Output: `{output[:20]}...`.")
 
     return output
 
@@ -77,14 +88,12 @@ def generate_together(
 def generate_together_stream(
     model,
     messages,
-    max_tokens=2048,
-    temperature=0.7,
+    max_tokens=MAX_TOKENS,
+    temperature=TEMPERATURE,
 ):
-    endpoint = "https://api.together.xyz/v1"
-    client = openai.OpenAI(
-        api_key=os.environ.get("TOGETHER_API_KEY"), base_url=endpoint
-    )
-    endpoint = "https://api.together.xyz/v1/chat/completions"
+    # endpoint = f"{API_BASE}/chat/completions"
+    endpoint = API_BASE
+    client = openai.OpenAI(api_key=API_KEY, base_url=endpoint)
     response = client.chat.completions.create(
         model=model,
         messages=messages,
@@ -99,12 +108,13 @@ def generate_together_stream(
 def generate_openai(
     model,
     messages,
-    max_tokens=2048,
-    temperature=0.7,
+    max_tokens=MAX_TOKENS,
+    temperature=TEMPERATURE,
 ):
 
     client = openai.OpenAI(
-        api_key=os.environ.get("OPENAI_API_KEY"),
+        base_url=API_BASE_2,
+        api_key=API_KEY_2,
     )
 
     for sleep_time in [1, 2, 4, 8, 16, 32]:
@@ -164,8 +174,8 @@ def generate_with_references(
     model,
     messages,
     references=[],
-    max_tokens=2048,
-    temperature=0.7,
+    max_tokens=MAX_TOKENS,
+    temperature=TEMPERATURE,
     generate_fn=generate_together,
 ):
 
