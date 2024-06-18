@@ -27,6 +27,8 @@ def generate_together(
     messages,
     max_tokens=MAX_TOKENS,
     temperature=TEMPERATURE,
+    api_base=API_BASE,
+    api_key=API_KEY,
     streaming=False,
 ):
 
@@ -40,20 +42,23 @@ def generate_together(
 
         try:
 
-            endpoint = f"{API_BASE}/chat/completions"
+            endpoint = f"{api_base}/chat/completions"
 
             logger.info(f"Sending request to {endpoint}")
+
+            # Assuming model is a list with one element, e.g., ['qwen2']
+            chat_model = model[0] if isinstance(model, list) else model
 
             res = requests.post(
                 endpoint,
                 json={
-                    "model": model,
+                    "model": chat_model,
                     "max_tokens": max_tokens,
                     "temperature": (temperature if temperature > 1e-4 else 0),
                     "messages": messages,
                 },
                 headers={
-                    "Authorization": f"Bearer {API_KEY}",
+                    "Authorization": f"Bearer {api_key}",
                 },
             )
 
@@ -90,10 +95,12 @@ def generate_together_stream(
     messages,
     max_tokens=MAX_TOKENS,
     temperature=TEMPERATURE,
+    api_base=API_BASE,
+    api_key=API_KEY
 ):
-    # endpoint = f"{API_BASE}/chat/completions"
-    endpoint = API_BASE
-    client = openai.OpenAI(api_key=API_KEY, base_url=endpoint)
+    # endpoint = f"{api_base}/chat/completions"
+    endpoint = api_base
+    client = openai.OpenAI(api_key=api_key, base_url=endpoint)
     response = client.chat.completions.create(
         model=model,
         messages=messages,
@@ -159,13 +166,13 @@ Responses from models:"""
 
         system += f"\n{i+1}. {reference}"
 
-    if messages[0]["role"] == "system":
+    # if messages[0]["role"] == "system":
 
-        messages[0]["content"] += "\n\n" + system
+    #     messages[0]["content"] += "\n\n" + system
 
-    else:
+    # else:
 
-        messages = [{"role": "system", "content": system}] + messages
+    messages = [{"role": "system", "content": system}] + messages
 
     return messages
 
@@ -177,6 +184,8 @@ def generate_with_references(
     max_tokens=MAX_TOKENS,
     temperature=TEMPERATURE,
     generate_fn=generate_together,
+    api_base=API_BASE,
+    api_key=API_KEY
 ):
 
     if len(references) > 0:
@@ -188,4 +197,6 @@ def generate_with_references(
         messages=messages,
         temperature=temperature,
         max_tokens=max_tokens,
+        api_base=api_base,
+        api_key=api_key
     )

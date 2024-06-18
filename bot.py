@@ -175,7 +175,7 @@ def main(
             instruction = Prompt.ask(
                 "\n[cyan bold]Prompt >>[/cyan bold] ",
                 default="Top things to do in NYC",
-                show_default=True,
+                show_default=False,
             )
         except EOFError:
             break
@@ -189,7 +189,7 @@ def main(
                 data["references"] = [""] * len(reference_models)
         else:
             data = {
-                "instruction": [[{"role": "user", "content": instruction}]]
+                "instruction": [{"role": "user", "content": instruction}]
                 * len(reference_models),
                 "references": [""] * len(reference_models),
                 "model": [m for m in reference_models],
@@ -222,6 +222,8 @@ def main(
             messages=data["instruction"][0],
             references=references,
             generate_fn=generate_together_stream,
+            api_base=API_BASE_2,
+            api_key=API_KEY_2
         )
 
         all_output = ""
@@ -231,7 +233,9 @@ def main(
         for chunk in output:
             out = chunk.choices[0].delta.content
             console.print(out, end="")
-            all_output += out
+            all_output += str(out)
+        if all_output.endswith('None'):
+            all_output = all_output[:-4]
         print()
 
         if DEBUG:
