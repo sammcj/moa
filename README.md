@@ -5,6 +5,8 @@ This Streamlit application showcases the Mixture of Agents (MOA) architecture pr
 ![MOA Architecture](./static/moa_groq.svg)
 *Source: Adaptation of [Together AI Blog - Mixture of Agents](https://www.together.ai/blog/together-moa)*
 
+![](image.png)
+
 ## Features
 
 - Interactive chat interface powered by MOA
@@ -12,6 +14,9 @@ This Streamlit application showcases the Mixture of Agents (MOA) architecture pr
 - Real-time streaming of responses
 - Visualisation of intermediate layer outputs
 - Customisable agent parameters through the UI
+
+
+![screenshot](screenshot.png)
 
 ## Installation
 
