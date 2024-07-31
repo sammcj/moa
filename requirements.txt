@@ -1,0 +1,20 @@
+
+streamlit
+watchdog
+python-dotenv
+streamlit-ace
+langchain
+fire
+loguru
+datasets
+python-dotenv
+langchain
+langchain_community
+langchain_ollama
+streamlit
+requests
+gradio
+
+# langchain_groq
+# crewai
+# crewai-tools
