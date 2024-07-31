@@ -22,7 +22,7 @@ layer_agent_config_def = {
     "layer_agent_1": {
         "system_prompt": "Written text should always use British English spelling. Think through your response step by step. {helper_response}",
         "model_name": "llama3.1:8b-instruct-q6_K",
-        "temperature": 0.7,
+        "temperature": 0.6,
     },
     "layer_agent_2": {
         "system_prompt": "Written text should always use British English spelling. Respond with a thought and then your response to the question. {helper_response}",
@@ -136,7 +136,7 @@ def initialize_session_state():
         "cycles": 2,
         "layer_agent_config": copy.deepcopy(layer_agent_config_def),
         "main_temperature": 0.7,
-        "main_max_tokens": 2048,
+        # "main_max_tokens": 2048,
         "main_api_base": "",
         "main_api_key": "",
         "main_num_ctx": 2048,
@@ -194,6 +194,24 @@ def render_sidebar():
             # )
 
         with st.expander("Advanced Settings", expanded=False):
+            st.session_state.main_num_ctx = st.number_input(
+                "Context Size (num_ctx)",
+                min_value=1,
+                max_value=32768,
+                value=st.session_state.main_num_ctx,
+                help="Number of context tokens. Set to 0 to use model default.",
+            )
+            st.session_state.main_num_batch = st.number_input(
+                "Batch Size (num_batch)",
+                min_value=0,
+                max_value=4096,
+                value=(
+                    st.session_state.main_num_batch
+                    if st.session_state.main_num_batch is not None
+                    else 0
+                ),
+                help="Batch size. Set to 0 to use model default.",
+            )
             st.session_state.main_top_p = st.slider(
                 "Top P",
                 min_value=0.0,
@@ -272,24 +290,6 @@ def render_sidebar():
             )
             st.session_state.main_api_key = st.text_input(
                 "API Key", value=st.session_state.main_api_key, type="password"
-            )
-            st.session_state.main_num_ctx = st.number_input(
-                "Context Size (num_ctx)",
-                min_value=1,
-                max_value=32768,
-                value=st.session_state.main_num_ctx,
-                help="Number of context tokens. Set to 0 to use model default.",
-            )
-            st.session_state.main_num_batch = st.number_input(
-                "Batch Size (num_batch)",
-                min_value=0,
-                max_value=4096,
-                value=(
-                    st.session_state.main_num_batch
-                    if st.session_state.main_num_batch is not None
-                    else 0
-                ),
-                help="Batch size. Set to 0 to use model default.",
             )
 
         with st.expander("System Prompt", expanded=False):

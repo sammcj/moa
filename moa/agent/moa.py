@@ -114,7 +114,7 @@ class MOAgent:
                 },
                 "layer_agent_3": {
                     "system_prompt": DEFAULT_SYSTEM_PROMPT,
-                    "model_name": "llama3:8b-instruct-q6_K",
+                    "model_name": "mistral-nemo:12b-instruct-2407-q6_K",
                 },
             }
 

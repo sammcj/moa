@@ -1,11 +1,17 @@
-# Mixture-of-Agents Demo Powered by Groq
+# Mixture-of-Agents Powered by Ollama
 
 This Streamlit application showcases the Mixture of Agents (MOA) architecture proposed by Together AI, powered by any Ollama compatible API (including Ollama). It allows users to interact with a configurable multi-agent system for enhanced AI-driven conversations.
 
-![MOA Architecture](./static/moa_groq.svg)
-*Source: Adaptation of [Together AI Blog - Mixture of Agents](https://www.together.ai/blog/together-moa)*
+Agent responses (layer agents):
 
-![](image.png)
+![](screenshot-agents-response.png)
+
+Final (mixture) response (main model):
+
+![](screenshot-main-response.png)
+
+![MOA Architecture](./static/moa.svg)
+*Source: Adaptation of [Together AI Blog - Mixture of Agents](https://www.together.ai/blog/together-moa)*
 
 ## Features
 
@@ -14,9 +20,6 @@ This Streamlit application showcases the Mixture of Agents (MOA) architecture pr
 - Real-time streaming of responses
 - Visualisation of intermediate layer outputs
 - Customisable agent parameters through the UI
-
-
-![screenshot](screenshot.png)
 
 ## Installation
 
