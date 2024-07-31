@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 import streamlit as st
 
+from langchain_community.llms import Ollama
 from langchain_ollama import ChatOllama
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -173,10 +174,11 @@ class MOAgent:
             ollama_kwargs["num_batch"] = int(num_batch)
         ollama_kwargs.update(llm_kwargs)
 
-        llm = ChatOllama(**ollama_kwargs)
+        llm = Ollama(**ollama_kwargs)
 
         chain = prompt | llm | StrOutputParser()
         return chain
+
     def chat(
         self,
         input: str,
