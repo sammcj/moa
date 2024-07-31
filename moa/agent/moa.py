@@ -5,6 +5,8 @@ Ollama API compatible agent
 from typing import Generator, Dict, Optional, Literal, TypedDict, List, Any, Callable
 from dotenv import load_dotenv
 
+import streamlit as st
+
 from langchain_ollama import ChatOllama
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -156,27 +158,25 @@ class MOAgent:
 
             callbacks.append(CustomCallback())
 
-        # Extract and convert num_ctx and num_batch from llm_kwargs
-        num_ctx = int(llm_kwargs.pop("num_ctx")) if "num_ctx" in llm_kwargs else None
-        num_batch = (
-            int(llm_kwargs.pop("num_batch")) if "num_batch" in llm_kwargs else None
-        )
+        # Extract num_ctx and num_batch
+        num_ctx = llm_kwargs.pop("num_ctx", None)
+        num_batch = llm_kwargs.pop("num_batch", None)
 
-        # Prepare kwargs for ChatOllama
-        chat_ollama_kwargs = {"model": model_name, "callbacks": callbacks, **llm_kwargs}
-
-        # Add num_ctx and num_batch only if they are not None
+        # Create the Ollama instance with the correct parameters
+        ollama_kwargs = {
+            "model": model_name,
+            "callbacks": callbacks,
+        }
         if num_ctx is not None:
-            chat_ollama_kwargs["num_ctx"] = num_ctx
+            ollama_kwargs["num_ctx"] = int(num_ctx)
         if num_batch is not None:
-            chat_ollama_kwargs["num_batch"] = num_batch
+            ollama_kwargs["num_batch"] = int(num_batch)
+        ollama_kwargs.update(llm_kwargs)
 
-        # Create the ChatOllama instance with the updated kwargs
-        llm = ChatOllama(**chat_ollama_kwargs)
+        llm = ChatOllama(**ollama_kwargs)
 
         chain = prompt | llm | StrOutputParser()
         return chain
-
     def chat(
         self,
         input: str,

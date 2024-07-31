@@ -47,51 +47,40 @@ valid_model_names = [
     "mistral-large-instruct-2407:iq2_m",
 ]
 
-
 def add_logo():
     logo = Image.open("static/logo.png")
     st.sidebar.image(logo, width=150)
-
 
 def api_request_callback(request):
     if st.session_state.log_api_requests:
         st.write(f"API Request: {request}")
 
 
-def update_layer_config(cycles):
-    current_config = st.session_state.layer_agent_config
-    new_config = {}
-    for i in range(1, cycles + 1):
-        layer_key = f"layer_agent_{i}"
-        if layer_key in current_config:
-            new_config[layer_key] = current_config[layer_key]
-        else:
-            new_config[layer_key] = copy.deepcopy(
-                layer_agent_config_def["layer_agent_1"]
-            )
-    st.session_state.layer_agent_config = new_config
-
-
 def stream_response(messages: Iterable[ResponseChunk]):
-    layer_outputs = {}
+    layer_outputs = {i: [] for i in range(1, st.session_state.cycles + 1)}
+    main_output = []
+
     for message in messages:
         if message["response_type"] == "intermediate":
             layer = message["metadata"]["layer"]
-            if layer not in layer_outputs:
-                layer_outputs[layer] = []
             layer_outputs[layer].append(message["delta"])
         else:
-            if layer_outputs:
-                for layer, outputs in layer_outputs.items():
-                    st.write(f"Layer {layer}")
-                    cols = st.columns(len(outputs))
-                    for i, output in enumerate(outputs):
-                        with cols[i]:
-                            st.expander(label=f"Agent {i+1}", expanded=False).write(
-                                output
-                            )
-                layer_outputs = {}
-            yield message["delta"]
+            main_output.append(message["delta"])
+
+    # Display all layer outputs side by side
+    cols = st.columns(st.session_state.cycles)
+    for i, (layer, outputs) in enumerate(layer_outputs.items()):
+        with cols[i]:
+            st.write(f"Layer {layer}")
+            if outputs:
+                st.expander(label=f"Agent {layer}", expanded=False).write(
+                    "".join(outputs)
+                )
+            else:
+                st.write("No output from this layer")
+
+    # Return the main output
+    return "".join(main_output)
 
 
 def set_moa_agent(**kwargs):
@@ -123,9 +112,9 @@ def set_moa_agent(**kwargs):
     if st.session_state.main_api_key:
         main_model_kwargs["api_key"] = st.session_state.main_api_key
 
-    if st.session_state.main_num_ctx > 0:
+    if st.session_state.main_num_ctx and st.session_state.main_num_ctx > 0:
         main_model_kwargs["num_ctx"] = st.session_state.main_num_ctx
-    if st.session_state.main_num_batch > 0:
+    if st.session_state.main_num_batch and st.session_state.main_num_batch > 0:
         main_model_kwargs["num_batch"] = st.session_state.main_num_batch
 
     st.session_state.moa_agent = MOAgent.from_config(
@@ -190,11 +179,6 @@ def render_sidebar():
                 value=st.session_state.cycles,
                 key="cycles_input",
             )
-            if new_cycles != st.session_state.cycles:
-                st.session_state.cycles = new_cycles
-                update_layer_config(new_cycles)
-                st.rerun()
-
             st.session_state.main_temperature = st.slider(
                 "Temperature",
                 min_value=0.0,
@@ -208,43 +192,6 @@ def render_sidebar():
                 max_value=8192,
                 value=st.session_state.main_max_tokens,
             )
-
-        with st.expander("Layer Agent Configuration", expanded=False):
-            for i in range(1, st.session_state.cycles + 1):
-                st.subheader(f"Layer Agent {i}")
-                layer_key = f"layer_agent_{i}"
-
-                st.session_state.layer_agent_config[layer_key]["model_name"] = (
-                    st.selectbox(
-                        f"Model for Layer {i}",
-                        options=valid_model_names,
-                        index=valid_model_names.index(
-                            st.session_state.layer_agent_config[layer_key]["model_name"]
-                        ),
-                        key=f"layer_model_{i}",
-                    )
-                )
-                st.session_state.layer_agent_config[layer_key]["system_prompt"] = (
-                    st.text_area(
-                        f"System Prompt for Layer {i}",
-                        value=st.session_state.layer_agent_config[layer_key][
-                            "system_prompt"
-                        ],
-                        key=f"layer_prompt_{i}",
-                    )
-                )
-                st.session_state.layer_agent_config[layer_key]["temperature"] = (
-                    st.slider(
-                        f"Temperature for Layer {i}",
-                        min_value=0.0,
-                        max_value=2.0,
-                        value=st.session_state.layer_agent_config[layer_key][
-                            "temperature"
-                        ],
-                        step=0.1,
-                        key=f"layer_temp_{i}",
-                    )
-                )
 
         with st.expander("Advanced Settings", expanded=False):
             st.session_state.main_top_p = st.slider(
@@ -318,6 +265,7 @@ def render_sidebar():
                 step=0.01,
                 help="Set to 0 to disable",
             )
+
         with st.expander("API Settings", expanded=False):
             st.session_state.main_api_base = st.text_input(
                 "API Base URL", value=st.session_state.main_api_base
@@ -356,22 +304,9 @@ def render_sidebar():
         if st.button("Update Configuration"):
             try:
                 set_moa_agent(
-                    main_model=new_main_model,
                     main_system_prompt=main_system_prompt,
                     cycles=new_cycles,
                     layer_agent_config=st.session_state.layer_agent_config,
-                    main_model_temperature=main_temperature,
-                    main_model_max_tokens=main_max_tokens,
-                    main_model_top_p=main_top_p,
-                    main_model_top_k=main_top_k,
-                    main_model_min_p=main_min_p,
-                    main_model_repetition_penalty=main_repetition_penalty,
-                    main_model_presence_penalty=main_presence_penalty,
-                    main_model_frequency_penalty=main_frequency_penalty,
-                    main_model_api_base=main_api_base,
-                    main_model_api_key=main_api_key,
-                    main_model_num_ctx=main_num_ctx,
-                    main_model_num_batch=main_num_batch,
                 )
                 st.session_state.messages = []
                 st.session_state.log_api_requests = log_api_requests
@@ -419,7 +354,6 @@ def render_sidebar():
             st.markdown(f"**Layer Agents Config**:")
             st.json(st.session_state.layer_agent_config)
 
-
 def render_chat_interface():
     st.markdown(
         "<h4 style='text-align: left; font-size: 20px;'>Mixture Of Agents</h4>",
@@ -438,9 +372,8 @@ def render_chat_interface():
 
         moa_agent: MOAgent = st.session_state.moa_agent
         with st.chat_message("assistant"):
-            message_placeholder = st.empty()
-            ast_mess = stream_response(moa_agent.chat(query, output_format="json"))
-            response = st.write_stream(ast_mess)
+            response = stream_response(moa_agent.chat(query, output_format="json"))
+            st.write(response)
 
         st.session_state.messages.append({"role": "assistant", "content": response})
 
@@ -454,8 +387,8 @@ def main():
     )
     add_logo()
     initialize_session_state()
-    render_sidebar()
     set_moa_agent()
+    render_sidebar()
     render_chat_interface()
 
 
