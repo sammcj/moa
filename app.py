@@ -18,7 +18,7 @@ load_dotenv()
 default_config = {
     "main_model": "llama3.1:8b-instruct-q6_K",
     "main_system_prompt": "You are a helpful assistant. Written text should always use British English spelling.",
-    "cycles": 3,
+    "cycles": 2,
     "layer_agent_config": {},
 }
 
@@ -26,17 +26,17 @@ layer_agent_config_def = {
     "layer_agent_1": {
         "system_prompt": "Written text should always use British English spelling. Think through your response step by step. {helper_response}",
         "model_name": "llama3.1:8b-instruct-q6_K",
-        "temperature": 0.4,
+        "temperature": 0.7,
     },
     "layer_agent_2": {
         "system_prompt": "Written text should always use British English spelling. Respond with a thought and then your response to the question. {helper_response}",
         "model_name": "qwen2-7b-maziyarpanahi-v0_8-instruct:Q6_K",
-        "temperature": 0.4,
+        "temperature": 0.5,
     },
     "layer_agent_3": {
         "system_prompt": "You are an expert programmer. Written text should always use British English spelling. Always use the latest libraries and techniques. {helper_response}",
         "model_name": "mistral-nemo:12b-instruct-2407-q6_K",
-        "temperature": 0.4,
+        "temperature": 0.3,
     },
 }
 
@@ -51,17 +51,17 @@ layer_agent_config_rec = {
     "layer_agent_1": {
         "system_prompt": "Written text should always use British English spelling. Think through your response step by step. {helper_response}",
         "model_name": "llama3.1:8b-instruct-q6_K",
-        "temperature": 0.1,
+        "temperature": 0.7,
     },
     "layer_agent_2": {
         "system_prompt": "Written text should always use British English spelling. Respond with a thought and then your response to the question. {helper_response}",
         "model_name": "qwen2-7b-maziyarpanahi-v0_8-instruct:Q6_K",
-        "temperature": 0.2,
+        "temperature": 0.5,
     },
     "layer_agent_3": {
         "system_prompt": "You are an expert programmer. Written text should always use British English spelling. Always use the latest libraries and techniques. {helper_response}",
         "model_name": "mistral-nemo:12b-instruct-2407-q6_K",
-        "temperature": 0.4,
+        "temperature": 0.3,
     },
     "layer_agent_4": {
         "system_prompt": "You are an expert programmer. Written text should always use British English spelling. Always use the latest libraries and techniques. {helper_response}",
@@ -111,8 +111,8 @@ def set_moa_agent(
     cycles: int = default_config["cycles"],
     layer_agent_config: dict[dict[str, any]] = copy.deepcopy(layer_agent_config_def),
     main_model_temperature: Optional[float] = None,
-    main_model_max_tokens: Optional[int] = None,
-    main_model_top_p: Optional[float] = None,
+    main_model_max_tokens: Optional[int] = 2048,
+    main_model_top_p: Optional[float] = 0.9,
     main_model_top_k: Optional[int] = None,
     main_model_min_p: Optional[float] = None,
     main_model_repetition_penalty: Optional[float] = None,
@@ -120,7 +120,7 @@ def set_moa_agent(
     main_model_frequency_penalty: Optional[float] = None,
     main_model_api_base: Optional[str] = None,
     main_model_api_key: Optional[str] = None,
-    main_model_num_ctx: Optional[int] = 4096,  # None,
+    main_model_num_ctx: Optional[int] = 2048,  # None,
     main_model_num_batch: Optional[int] = None,
     override: bool = False,
 ):
@@ -140,23 +140,23 @@ def set_moa_agent(
     if "main_max_tokens" not in st.session_state:
         st.session_state.main_max_tokens = main_model_max_tokens  # can be None
     if "main_top_p" not in st.session_state:
-        st.session_state.main_top_p = main_model_top_p or 1.0  # Default value
+        st.session_state.main_top_p = main_model_top_p  # Can be None
     if "main_top_k" not in st.session_state:
-        st.session_state.main_top_k = main_model_top_k or 50  # Default value
+        st.session_state.main_top_k = main_model_top_k  # Can be None
     if "main_min_p" not in st.session_state:
-        st.session_state.main_min_p = main_model_min_p or 0.0  # Default value
+        st.session_state.main_min_p = main_model_min_p  # Can be None
     if "main_repetition_penalty" not in st.session_state:
         st.session_state.main_repetition_penalty = (
-            main_model_repetition_penalty or 1.0
-        )  # Default value
+            main_model_repetition_penalty  # Can be None  # Default value
+        )
     if "main_presence_penalty" not in st.session_state:
         st.session_state.main_presence_penalty = (
-            main_model_presence_penalty or 0.0
-        )  # Default value
+            main_model_presence_penalty  # Can be None  # Default value
+        )
     if "main_frequency_penalty" not in st.session_state:
         st.session_state.main_frequency_penalty = (
-            main_model_frequency_penalty or 0.0
-        )  # Default value
+            main_model_frequency_penalty  # Can be None  # Default value
+        )
     if "main_api_base" not in st.session_state:
         st.session_state.main_api_base = main_model_api_base or ""  # Default value
     if "main_api_key" not in st.session_state:
