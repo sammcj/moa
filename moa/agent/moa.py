@@ -2,6 +2,7 @@
 Ollama API compatible agent
 """
 
+import os
 from typing import Generator, Dict, Optional, Literal, TypedDict, List, Any, Callable
 from dotenv import load_dotenv
 
@@ -173,6 +174,12 @@ class MOAgent:
         if num_batch is not None:
             ollama_kwargs["num_batch"] = int(num_batch)
         ollama_kwargs.update(llm_kwargs)
+
+        # set the base url for the Ollama instance
+        if "base_url" not in ollama_kwargs:
+            ollama_kwargs["base_url"] = os.getenv(
+                "OLLAMA_HOST",
+            )
 
         llm = Ollama(**ollama_kwargs)
 

@@ -90,14 +90,14 @@ def set_moa_agent(**kwargs):
 
     main_model_kwargs = {
         "temperature": st.session_state.main_temperature,
-        "max_tokens": st.session_state.main_max_tokens,
+        # "max_tokens": st.session_state.main_max_tokens,
     }
 
     optional_params = [
         ("top_p", "main_top_p"),
         ("top_k", "main_top_k"),
-        ("min_p", "main_min_p"),
-        ("repetition_penalty", "main_repetition_penalty"),
+        # ("min_p", "main_min_p"),
+        # ("repetition_penalty", "main_repetition_penalty"),
         ("presence_penalty", "main_presence_penalty"),
         ("frequency_penalty", "main_frequency_penalty"),
     ]
@@ -151,8 +151,8 @@ def initialize_session_state():
     optional_params = [
         "main_top_p",
         "main_top_k",
-        "main_min_p",
-        "main_repetition_penalty",
+        # "main_min_p",
+        # "main_repetition_penalty",
         "main_presence_penalty",
         "main_frequency_penalty",
         "main_num_batch",
@@ -186,12 +186,12 @@ def render_sidebar():
                 value=st.session_state.main_temperature,
                 step=0.1,
             )
-            st.session_state.main_max_tokens = st.number_input(
-                "Max Tokens",
-                min_value=1,
-                max_value=8192,
-                value=st.session_state.main_max_tokens,
-            )
+            # st.session_state.main_max_tokens = st.number_input(
+            #     "Max Tokens",
+            #     min_value=1,
+            #     max_value=8192,
+            #     value=st.session_state.main_max_tokens,
+            # )
 
         with st.expander("Advanced Settings", expanded=False):
             st.session_state.main_top_p = st.slider(
@@ -217,30 +217,30 @@ def render_sidebar():
                 ),
                 help="Set to 0 to disable",
             )
-            st.session_state.main_min_p = st.slider(
-                "Min P",
-                min_value=0.0,
-                max_value=1.0,
-                value=(
-                    st.session_state.main_min_p
-                    if st.session_state.main_min_p is not None
-                    else 0.05
-                ),
-                step=0.01,
-                help="Set to 0 to disable",
-            )
-            st.session_state.main_repetition_penalty = st.slider(
-                "Repetition Penalty",
-                min_value=1.0,
-                max_value=2.0,
-                value=(
-                    st.session_state.main_repetition_penalty
-                    if st.session_state.main_repetition_penalty is not None
-                    else 1.1
-                ),
-                step=0.01,
-                help="Set to 1 to disable",
-            )
+            # st.session_state.main_min_p = st.slider(
+            #     "Min P",
+            #     min_value=0.0,
+            #     max_value=1.0,
+            #     value=(
+            #         st.session_state.main_min_p
+            #         if st.session_state.main_min_p is not None
+            #         else 0.05
+            #     ),
+            #     step=0.01,
+            #     help="Set to 0 to disable",
+            # )
+            # st.session_state.main_repetition_penalty = st.slider(
+            #     "Repetition Penalty",
+            #     min_value=1.0,
+            #     max_value=2.0,
+            #     value=(
+            #         st.session_state.main_repetition_penalty
+            #         if st.session_state.main_repetition_penalty is not None
+            #         else 1.1
+            #     ),
+            #     step=0.01,
+            #     help="Set to 1 to disable",
+            # )
             st.session_state.main_presence_penalty = st.slider(
                 "Presence Penalty",
                 min_value=0.0,
@@ -348,9 +348,9 @@ def render_sidebar():
             st.markdown(
                 f"**Main Model Temperature**: `{st.session_state.main_temperature:.1f}`"
             )
-            st.markdown(
-                f"**Main Model Max Tokens**: `{st.session_state.main_max_tokens}`"
-            )
+            # st.markdown(
+            #     f"**Main Model Max Tokens**: `{st.session_state.main_max_tokens}`"
+            # )
             st.markdown(f"**Layer Agents Config**:")
             st.json(st.session_state.layer_agent_config)
 
