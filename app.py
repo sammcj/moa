@@ -152,11 +152,11 @@ def initialize_session_state():
         st.session_state.messages = []
 
     default_values = {
-        "main_model": "llama3.1:8b-instruct-q6_K",
+        "main_model": "rys-llama3.1:8b-instruct-Q8_0",
         "main_system_prompt": "You are a helpful assistant. Written text should always use British English spelling.",
         "cycles": 2,
         "layer_agent_config": copy.deepcopy(layer_agent_config_def),
-        "main_temperature": 0.7,
+        "main_temperature": 0.6,
         "main_api_base": "",
         "main_api_key": "",
         "main_num_ctx": 2048,
