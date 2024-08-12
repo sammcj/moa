@@ -7,6 +7,8 @@ from streamlit_ace import st_ace
 import copy
 from dotenv import load_dotenv
 from PIL import Image
+import requests
+import os
 
 load_dotenv()
 
@@ -38,6 +40,7 @@ layer_agent_config_def = {
 
 valid_model_names = [
     "llama3.1:8b-instruct-q6_K",
+    "rys-llama3.1:8b-instruct-Q8_0",
     "qwen2-7b-maziyarpanahi-v0_8-instruct:Q6_K",
     "mistral-nemo:12b-instruct-2407-q6_K",
     "deepseek-coder-v2-lite-instruct:q6_k_l",
@@ -54,6 +57,24 @@ def add_logo():
 def api_request_callback(request):
     if st.session_state.log_api_requests:
         st.write(f"API Request: {request}")
+
+
+def fetch_ollama_models():
+    try:
+        ollama_host = st.session_state.main_api_base or os.getenv(
+            "OLLAMA_HOST", "http://localhost:11434"
+        )
+        response = requests.get(f"{ollama_host}/api/tags")
+        if response.status_code == 200:
+            data = response.json()
+            models = [model["name"] for model in data["models"]]
+            return models
+        else:
+            st.error(f"Failed to fetch models: HTTP {response.status_code}")
+            return None
+    except Exception as e:
+        st.error(f"Error fetching models: {str(e)}")
+        return None
 
 
 def stream_response(messages: Iterable[ResponseChunk]):
@@ -131,7 +152,7 @@ def initialize_session_state():
         st.session_state.messages = []
 
     default_values = {
-        "main_model": "llama3.1:8b-instruct-q6_K",
+        "main_model": "rys-llama3.1:8b-instruct-Q8_0",
         "main_system_prompt": "You are a helpful assistant. Written text should always use British English spelling.",
         "cycles": 2,
         "layer_agent_config": copy.deepcopy(layer_agent_config_def),
@@ -141,6 +162,7 @@ def initialize_session_state():
         "main_api_key": "",
         "main_num_ctx": 2048,
         "log_api_requests": False,
+        "available_models": valid_model_names,
     }
 
     for key, value in default_values.items():
@@ -167,10 +189,25 @@ def render_sidebar():
         st.title("Mixture of (Ollama) Agents")
 
         with st.expander("Main Model Settings", expanded=False):
+            if st.button("Fetch Ollama Models"):
+                models = fetch_ollama_models()
+                if models:
+                    st.session_state.available_models = models
+                    st.success("Models fetched successfully!")
+                else:
+                    st.warning("Failed to fetch models. Using default list.")
+
+            available_models = st.session_state.get(
+                "available_models", valid_model_names
+            )
             st.session_state.main_model = st.selectbox(
                 "Select Main Model",
-                options=valid_model_names,
-                index=valid_model_names.index(st.session_state.main_model),
+                options=available_models,
+                index=(
+                    available_models.index(st.session_state.main_model)
+                    if st.session_state.main_model in available_models
+                    else 0
+                ),
             )
             new_cycles = st.number_input(
                 "Number of Layers",

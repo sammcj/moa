@@ -20,10 +20,10 @@ from langchain_core.runnables import (
 )
 from langchain_core.output_parsers import StrOutputParser
 from langchain.callbacks import StdOutCallbackHandler
-
 from .prompts import DEFAULT_SYSTEM_PROMPT, REFERENCE_SYSTEM_PROMPT
 
 load_dotenv()
+
 
 class ResponseChunk(TypedDict):
     delta: str
