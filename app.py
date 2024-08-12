@@ -14,7 +14,7 @@ load_dotenv()
 
 # Update the default configuration
 default_config = {
-    "main_model": "llama3.1:8b-instruct-q6_K",
+    "main_model": "rys-llama3.1:8b-instruct-Q8_0",
     "main_system_prompt": "You are a helpful assistant. Written text should always use British English spelling.",
     "cycles": 2,
     "layer_agent_config": {},
@@ -23,7 +23,7 @@ default_config = {
 layer_agent_config_def = {
     "layer_agent_1": {
         "system_prompt": "Written text should always use British English spelling. Think through your response step by step. {helper_response}",
-        "model_name": "llama3.1:8b-instruct-q6_K",
+        "model_name": "rys-llama3.1:8b-instruct-Q8_0",
         "temperature": 0.6,
     },
     "layer_agent_2": {
@@ -354,12 +354,12 @@ def render_sidebar():
         if st.button("Use Recommended Config"):
             try:
                 recommended_config = {
-                    "main_model": "llama3.1:8b-instruct-q6_K",
+                    "main_model": "rys-llama3.1:8b-instruct-Q8_0",
                     "cycles": 2,
                     "layer_agent_config": {
                         "layer_agent_1": {
                             "system_prompt": "Written text should always use British English spelling. Think through your response step by step. {helper_response}",
-                            "model_name": "llama3.1:8b-instruct-q6_K",
+                            "model_name": "rys-llama3.1:8b-instruct-Q8_0",
                             "temperature": 0.7,
                         },
                         "layer_agent_2": {
