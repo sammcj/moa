@@ -70,7 +70,7 @@ class MOAgent:
     @classmethod
     def from_config(
         cls,
-        main_model: Optional[str] = "llama3:8b-instruct-q6_K",
+        main_model: Optional[str] = "rys-llama3.1:8b-instruct-Q8_0",
         main_system_prompt: Optional[str] = None,
         cycles: int = 1,
         layer_agent_config: Optional[Dict] = None,
@@ -106,7 +106,7 @@ class MOAgent:
             layer_agent_config = {
                 "layer_agent_1": {
                     "system_prompt": DEFAULT_SYSTEM_PROMPT,
-                    "model_name": "llama3:8b-instruct-q6_K",
+                    "model_name": "rys-llama3.1:8b-instruct-Q8_0",
                 },
                 "layer_agent_2": {
                     "system_prompt": DEFAULT_SYSTEM_PROMPT,
@@ -122,7 +122,7 @@ class MOAgent:
         for key, value in layer_agent_config.items():
             chain = MOAgent._create_agent_from_system_prompt(
                 system_prompt=value.pop("system_prompt", DEFAULT_SYSTEM_PROMPT),
-                model_name=value.pop("model_name", "llama3:8b-instruct-q6_K"),
+                model_name=value.pop("model_name", "rys-llama3.1:8b-instruct-Q8_0"),
                 api_request_callback=api_request_callback,
                 **value,
             )
@@ -134,7 +134,7 @@ class MOAgent:
     @staticmethod
     def _create_agent_from_system_prompt(
         system_prompt: str = DEFAULT_SYSTEM_PROMPT,
-        model_name: str = "llama3:8b-instruct-q6_K",
+        model_name: str = "rys-llama3.1:8b-instruct-Q8_0",
         api_request_callback: Optional[Callable[[Dict], None]] = None,
         **llm_kwargs,
     ) -> RunnableSerializable[Dict, str]:
