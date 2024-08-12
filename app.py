@@ -38,7 +38,7 @@ layer_agent_config_def = {
     },
 }
 
-valid_model_names = [
+default_model_names = [
     "llama3.1:8b-instruct-q6_K",
     "rys-llama3.1:8b-instruct-Q8_0",
     "qwen2-7b-maziyarpanahi-v0_8-instruct:Q6_K",
@@ -152,17 +152,16 @@ def initialize_session_state():
         st.session_state.messages = []
 
     default_values = {
-        "main_model": "rys-llama3.1:8b-instruct-Q8_0",
+        "main_model": "llama3.1:8b-instruct-q6_K",
         "main_system_prompt": "You are a helpful assistant. Written text should always use British English spelling.",
         "cycles": 2,
         "layer_agent_config": copy.deepcopy(layer_agent_config_def),
         "main_temperature": 0.7,
-        # "main_max_tokens": 2048,
         "main_api_base": "",
         "main_api_key": "",
         "main_num_ctx": 2048,
         "log_api_requests": False,
-        "available_models": valid_model_names,
+        "available_models": default_model_names,
     }
 
     for key, value in default_values.items():
@@ -198,7 +197,7 @@ def render_sidebar():
                     st.warning("Failed to fetch models. Using default list.")
 
             available_models = st.session_state.get(
-                "available_models", valid_model_names
+                "available_models", default_model_names
             )
             st.session_state.main_model = st.selectbox(
                 "Select Main Model",
