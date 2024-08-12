@@ -39,12 +39,12 @@ layer_agent_config_def = {
 }
 
 default_model_names = [
-    "llama3.1:8b-instruct-q6_K",
     "rys-llama3.1:8b-instruct-Q8_0",
     "qwen2-7b-maziyarpanahi-v0_8-instruct:Q6_K",
     "mistral-nemo:12b-instruct-2407-q6_K",
     "deepseek-coder-v2-lite-instruct:q6_k_l",
     "codestral-22b_ef16:q6_k",
+    "llama3.1:8b-instruct-q6_K",
     "llama3.1:70b-instruct-q4_K_M",
     "qwen2-72b-maziyarpanahi-v0_1-instruct:IQ4_XS",
     "mistral-large-instruct-2407:iq2_m",
