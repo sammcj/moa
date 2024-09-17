@@ -1,0 +1,15 @@
+{
+    "spellright.language": [],
+    "spellright.documentTypes": [
+        "markdown",
+        "latex"
+    ],
+    "flake8.args": [
+        "--max-line-length=150"
+    ],
+    "python.testing.pytestArgs": [
+        "test"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

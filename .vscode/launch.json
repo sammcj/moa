@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+       "name": "Debug",
+       "type": "debugpy",
+       "request": "launch",
+       "module": "streamlit",
+       "env": {
+           "STREAMLIT_APP": "app.py",
+           "STREAMLIT_ENV": "development",
+           "PYTHONPATH": "${workspaceRoot}/src",
+       },
+       "args": [
+           "run",
+           "app.py"
+       ],
+       "justMyCode": false,
+       "jinja": true
+   },
+  ]
+}
