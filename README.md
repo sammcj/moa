@@ -23,23 +23,65 @@ Final (mixture) response (main model):
 
 ## Installation
 
-1. Clone the repository:
+0. Install Ollama:
+   https://ollama.com
+
+2. Clone the repository:
    ```
    git clone https://github.com/sammcj/moa.git
    cd moa
    ```
 
-2. Install the required dependencies:
+3. Install the required dependencies:
    ```
    pip install -r requirements.txt
    ```
 
-3. Set up your environment variables:
+4. Set up your environment variables:
    Create a `.env` file in the root directory and add your Ollama compatible base URL and API key:
    ```
    OLLAMA_HOST=http://localhost:11434
    OLLAMA_API_KEY=ollama
    ```
+
+## Changing default model selection
+
+You might want to change the list of models availble in the UI and default settings for the main model (aggregator) and/or agents (proposers). Updated correspondiong fields in `app.py`:
+```
+default_config = {
+    "main_model": "llama3.1:8b-instruct-q6_K",
+    "main_system_prompt": "You are a helpful assistant. Written text should always use British English spelling.",
+    "cycles": 2,
+    "layer_agent_config": {},
+}
+
+layer_agent_config_def = {
+    "layer_agent_1": {
+        # "system_prompt": "Written text should always use British English spelling. Think through your response step by step. {helper_response}",
+        "system_prompt": "{helper_response}",
+        "model_name": "phi3.5:3.8b-mini-instruct-q8_0",
+        "temperature": 0.6,
+    },
+    "layer_agent_2": {
+        # "system_prompt": "Written text should always use British English spelling. Respond with a thought and then your response to the question. {helper_response}",
+        "system_prompt": "{helper_response}",
+        "model_name": "llama3.1:8b-instruct-q6_K",
+        "temperature": 0.5,
+    },
+    "layer_agent_3": {
+        # "system_prompt": "You are an expert programmer. Written text should always use British English spelling. Always use the latest libraries and techniques. {helper_response}",
+        "system_prompt": "{helper_response}",
+        "model_name": "yi:9b",
+        "temperature": 0.3,
+    },
+}
+
+default_model_names = [
+    "phi3.5:3.8b-mini-instruct-q8_0",
+    "llama3.1:8b-instruct-q6_K",
+    "yi:9b"
+]
+```
 
 ## Usage
 
@@ -72,8 +114,8 @@ Final (mixture) response (main model):
 
 The MOA system can be configured through the Streamlit UI or by modifying the default configuration in `app.py`. The main configurable parameters are:
 
-- Main model: The primary language model used for generating final responses
-- Number of cycles: How many times the layer agents are invoked before the main agent
+- Main model (Agregator): The primary language model used for generating final responses
+- Number of cycles/layers: How many times the layer agents are invoked before the main agent
 - Layer agent configuration: A JSON object defining the system prompts, model names, and other parameters for each layer agent
 
 ## Contributing
