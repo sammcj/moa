@@ -1,9 +1,7 @@
 import streamlit as st
-import json
-from typing import Iterable, Optional
+from typing import Iterable
 from moa.agent import MOAgent
 from moa.agent.moa import ResponseChunk
-from streamlit_ace import st_ace
 import copy
 from dotenv import load_dotenv
 from PIL import Image
@@ -14,7 +12,7 @@ load_dotenv()
 
 # Update the default configuration
 default_config = {
-    "main_model": "rys-llama3.1:8b-instruct-Q8_0",
+    "main_model": "llama3.1:8b-instruct-q6_K",
     "main_system_prompt": "You are a helpful assistant. Written text should always use British English spelling.",
     "cycles": 2,
     "layer_agent_config": {},
@@ -22,37 +20,36 @@ default_config = {
 
 layer_agent_config_def = {
     "layer_agent_1": {
-        "system_prompt": "Written text should always use British English spelling. Think through your response step by step. {helper_response}",
-        "model_name": "rys-llama3.1:8b-instruct-Q8_0",
+        # "system_prompt": "Written text should always use British English spelling. Think through your response step by step. {helper_response}",
+        "system_prompt": "{helper_response}",
+        "model_name": "phi3.5:3.8b-mini-instruct-q8_0",
         "temperature": 0.6,
     },
     "layer_agent_2": {
-        "system_prompt": "Written text should always use British English spelling. Respond with a thought and then your response to the question. {helper_response}",
-        "model_name": "qwen2-7b-maziyarpanahi-v0_8-instruct:Q6_K",
+        # "system_prompt": "Written text should always use British English spelling. Respond with a thought and then your response to the question. {helper_response}",
+        "system_prompt": "{helper_response}",
+        "model_name": "llama3.1:8b-instruct-q6_K",
         "temperature": 0.5,
     },
     "layer_agent_3": {
-        "system_prompt": "You are an expert programmer. Written text should always use British English spelling. Always use the latest libraries and techniques. {helper_response}",
-        "model_name": "mistral-nemo:12b-instruct-2407-q6_K",
+        # "system_prompt": "You are an expert programmer. Written text should always use British English spelling. Always use the latest libraries and techniques. {helper_response}",
+        "system_prompt": "{helper_response}",
+        "model_name": "yi:9b",
         "temperature": 0.3,
     },
 }
 
 default_model_names = [
-    "rys-llama3.1:8b-instruct-Q8_0",
-    "qwen2-7b-maziyarpanahi-v0_8-instruct:Q6_K",
-    "mistral-nemo:12b-instruct-2407-q6_K",
-    "deepseek-coder-v2-lite-instruct:q6_k_l",
-    "codestral-22b_ef16:q6_k",
+    "phi3.5:3.8b-mini-instruct-q8_0",
     "llama3.1:8b-instruct-q6_K",
-    "llama3.1:70b-instruct-q4_K_M",
-    "qwen2-72b-maziyarpanahi-v0_1-instruct:IQ4_XS",
-    "mistral-large-instruct-2407:iq2_m",
+    "yi:9b"
 ]
+
 
 def add_logo():
     logo = Image.open("static/logo.png")
     st.sidebar.image(logo, width=150)
+
 
 def api_request_callback(request):
     if st.session_state.log_api_requests:
@@ -92,11 +89,14 @@ def stream_response(messages: Iterable[ResponseChunk]):
     cols = st.columns(st.session_state.cycles)
     for i, (layer, outputs) in enumerate(layer_outputs.items()):
         with cols[i]:
-            st.write(f"Layer {layer}")
+            # st.write(f"Layer {layer}")
             if outputs:
-                st.expander(label=f"Agent {layer}", expanded=False).write(
-                    "".join(outputs)
-                )
+                with st.expander(label=f"Layer {layer}", expanded=False):
+                    for idx, message in enumerate(outputs):
+                        model_name = st.session_state.layer_agent_config.get(f"layer_agent_{idx+1}", {}).get("model_name", "Unknown Model")
+                        st.write(f"Model: {model_name}")
+                        st.write(message)
+                        st.write("---")  # Delimiter
             else:
                 st.write("No output from this layer")
 
@@ -152,14 +152,14 @@ def initialize_session_state():
         st.session_state.messages = []
 
     default_values = {
-        "main_model": "rys-llama3.1:8b-instruct-Q8_0",
+        "main_model": default_config["main_model"],
         "main_system_prompt": "You are a helpful assistant. Written text should always use British English spelling.",
         "cycles": 2,
         "layer_agent_config": copy.deepcopy(layer_agent_config_def),
         "main_temperature": 0.6,
         "main_api_base": "",
         "main_api_key": "",
-        "main_num_ctx": 2048,
+        "main_num_ctx": 8192,
         "log_api_requests": False,
         "available_models": default_model_names,
     }
@@ -353,17 +353,17 @@ def render_sidebar():
         if st.button("Use Recommended Config"):
             try:
                 recommended_config = {
-                    "main_model": "rys-llama3.1:8b-instruct-Q8_0",
+                    "main_model": "llama3.1:8b-instruct-q6_K",
                     "cycles": 2,
                     "layer_agent_config": {
                         "layer_agent_1": {
                             "system_prompt": "Written text should always use British English spelling. Think through your response step by step. {helper_response}",
-                            "model_name": "rys-llama3.1:8b-instruct-Q8_0",
+                            "model_name": "llama3.1:8b-instruct-q6_K",
                             "temperature": 0.7,
                         },
                         "layer_agent_2": {
                             "system_prompt": "Written text should always use British English spelling. Respond with a thought and then your response to the question. {helper_response}",
-                            "model_name": "qwen2-7b-maziyarpanahi-v0_8-instruct:Q6_K",
+                            "model_name": "llama3.1:8b-instruct-q6_K",
                             "temperature": 0.5,
                         },
                     },
@@ -372,7 +372,8 @@ def render_sidebar():
                 st.session_state.messages = []
                 st.success("Configuration updated to recommended settings!")
             except Exception as e:
-                st.error(f"Error updating to recommended configuration: {str(e)}")
+                st.error(
+                    f"Error updating to recommended configuration: {str(e)}")
 
         # Add current configuration display
         with st.expander("Current MOA Configuration", expanded=False):
@@ -387,8 +388,9 @@ def render_sidebar():
             # st.markdown(
             #     f"**Main Model Max Tokens**: `{st.session_state.main_max_tokens}`"
             # )
-            st.markdown(f"**Layer Agents Config**:")
+            st.markdown("**Layer Agents Config**:")
             st.json(st.session_state.layer_agent_config)
+
 
 def render_chat_interface():
     st.markdown(
@@ -408,10 +410,12 @@ def render_chat_interface():
 
         moa_agent: MOAgent = st.session_state.moa_agent
         with st.chat_message("assistant"):
-            response = stream_response(moa_agent.chat(query, output_format="json"))
+            response = stream_response(
+                moa_agent.chat(query, output_format="json"))
             st.write(response)
 
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.messages.append(
+            {"role": "assistant", "content": response})
 
 
 def main():
